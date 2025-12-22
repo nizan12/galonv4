@@ -342,7 +342,7 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {activeTab === 'users' ? (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-slide-up">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
              <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:max-w-2xl">
                 <div className="relative flex-1 w-full">
@@ -465,7 +465,7 @@ const AdminDashboard: React.FC = () => {
           )}
         </div>
       ) : activeTab === 'rooms' ? (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-slide-up">
           <div className="flex justify-between items-center px-2">
              <h2 className="text-xl font-black text-slate-900 tracking-tight">Manajemen Kamar</h2>
              <button onClick={() => setModalMode('create-room')} className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-black transition-all flex items-center gap-2">
@@ -569,6 +569,135 @@ const AdminDashboard: React.FC = () => {
       )}
 
       {/* MODALS */}
+      <Modal isOpen={modalMode === 'room-detail'} onClose={() => setModalMode(null)} title={`Detail Kamar: ${selectedRoom?.name}`} maxWidth="max-w-4xl">
+        {selectedRoom && (
+          <div className="space-y-10 animate-slide-up">
+            {/* Massive Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl shadow-slate-200/50">
+                  <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Total Pengeluaran</p>
+                  <h4 className="text-3xl font-black">Rp {purchases.filter(p => p.roomId === selectedRoom.id).reduce((acc, curr) => acc + curr.cost, 0).toLocaleString()}</h4>
+               </div>
+               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Volume Galon</p>
+                  <h4 className="text-3xl font-black text-slate-900">{purchases.filter(p => p.roomId === selectedRoom.id).length} <span className="text-[10px] text-slate-300 font-bold uppercase">Unit Terdaftar</span></h4>
+               </div>
+               <div className="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-blue-100">
+                  <p className="text-[9px] font-black text-blue-200 uppercase tracking-widest mb-2">Cycle Sekarang</p>
+                  <h4 className="text-3xl font-black">Cycle #{selectedRoom.cycleCount || 0}</h4>
+               </div>
+            </div>
+
+            {/* Current Turn Focus */}
+            {selectedRoom.memberUids.length > 0 && (
+               <div className="bg-blue-50 border border-blue-100 rounded-[2.5rem] p-8 flex items-center justify-between gap-6">
+                  <div className="flex items-center gap-6">
+                     <div className="h-20 w-20 bg-blue-600 rounded-[1.8rem] flex items-center justify-center text-white border-4 border-white shadow-lg overflow-hidden shrink-0">
+                        {users.filter(u => u.roomId === selectedRoom.id).sort((a,b) => a.turnOrder - b.turnOrder)[selectedRoom.currentTurnIndex]?.photoUrl ? (
+                           <img src={users.filter(u => u.roomId === selectedRoom.id).sort((a,b) => a.turnOrder - b.turnOrder)[selectedRoom.currentTurnIndex].photoUrl} className="w-full h-full object-cover" />
+                        ) : (
+                           <span className="text-2xl font-black">{users.filter(u => u.roomId === selectedRoom.id).sort((a,b) => a.turnOrder - b.turnOrder)[selectedRoom.currentTurnIndex]?.displayName.charAt(0)}</span>
+                        )}
+                     </div>
+                     <div>
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Penanggung Jawab Aktif</p>
+                        <h5 className="text-2xl font-black text-slate-900">{users.filter(u => u.roomId === selectedRoom.id).sort((a,b) => a.turnOrder - b.turnOrder)[selectedRoom.currentTurnIndex]?.displayName || 'Menunggu'}</h5>
+                     </div>
+                  </div>
+                  <span className="hidden sm:block px-6 py-2 bg-blue-600 text-white text-[10px] font-black rounded-full uppercase tracking-widest shadow-lg shadow-blue-100 animate-pulse">Sedang Giliran</span>
+               </div>
+            )}
+
+            {/* Tabs Control */}
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl">
+              {['members', 'history'].map(tab => (
+                <button 
+                  key={tab} 
+                  onClick={() => setRoomModalTab(tab as any)} 
+                  className={`flex-1 py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] transition-all ${roomModalTab === tab ? 'bg-white shadow-xl text-slate-900 scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  {tab === 'members' ? 'Analisis Penghuni' : 'Arsip Transaksi'}
+                </button>
+              ))}
+            </div>
+
+            {roomModalTab === 'members' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-up">
+                 {users.filter(u => u.roomId === selectedRoom.id).sort((a,b) => a.turnOrder - b.turnOrder).map((m, idx) => {
+                   const userPurchases = purchases.filter(p => p.buyerUid === m.uid && p.roomId === selectedRoom.id);
+                   return (
+                      <div key={m.uid} className="flex flex-col p-6 bg-white rounded-[2rem] border border-slate-100 hover:border-blue-200 transition-all group">
+                         <div className="flex items-center gap-4 mb-4">
+                            <div className="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 overflow-hidden shrink-0 group-hover:scale-110 transition-transform">
+                               {m.photoUrl ? (
+                                 <img src={m.photoUrl} className="w-full h-full object-cover" />
+                               ) : (
+                                 <span className="font-black text-sm text-slate-300">{m.displayName.charAt(0)}</span>
+                               )}
+                            </div>
+                            <div className="min-w-0">
+                               <p className="text-sm font-black text-slate-900 leading-tight truncate">{m.displayName}</p>
+                               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Order #{m.turnOrder}</p>
+                            </div>
+                         </div>
+                         <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-slate-50 p-3 rounded-xl">
+                               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total Beli</p>
+                               <p className="text-sm font-black text-slate-900">{userPurchases.length} Galon</p>
+                            </div>
+                            <div className="bg-slate-50 p-3 rounded-xl">
+                               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Bypass Quota</p>
+                               <p className="text-sm font-black text-slate-900">{m.bypassQuota} / {m.maxBypassQuota}</p>
+                            </div>
+                         </div>
+                      </div>
+                   )
+                 })}
+                 {users.filter(u => u.roomId === selectedRoom.id).length === 0 && <p className="col-span-full text-center py-20 text-[11px] font-black text-slate-300 uppercase italic">Kamar Kosong - Tidak ada penghuni terdaftar</p>}
+              </div>
+            ) : (
+              <div className="space-y-4 animate-slide-up">
+                {purchases.filter(p => p.roomId === selectedRoom.id).length === 0 ? (
+                  <div className="py-20 text-center text-[11px] font-black text-slate-300 uppercase italic">Belum ada transaksi terekam untuk kamar ini</div>
+                ) : (
+                  purchases.filter(p => p.roomId === selectedRoom.id).map(p => (
+                    <div key={p.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex items-center justify-between group hover:border-blue-200 transition-all">
+                      <div className="flex items-center gap-6">
+                        <div 
+                          onClick={() => { if (p.photoUrls?.length > 0) { setPreviewPhotos(p.photoUrls); setActivePreviewIdx(0); } }} 
+                          className="h-20 w-20 rounded-2xl bg-slate-100 overflow-hidden cursor-pointer relative shrink-0 border border-slate-100 group-hover:scale-105 transition-transform"
+                        >
+                          {p.photoUrls?.[0] && <img src={p.photoUrls[0]} className="w-full h-full object-cover" />}
+                          {p.photoUrls && p.photoUrls.length > 1 && <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] font-black px-1.5 rounded-md backdrop-blur-sm">+{p.photoUrls.length - 1}</span>}
+                        </div>
+                        <div className="min-w-0">
+                           <div className="flex items-center gap-2 mb-1">
+                              <p className="font-black text-md text-slate-900 truncate">{p.buyerName}</p>
+                              {p.isDebtPayment && <span className="bg-red-50 text-red-500 text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest border border-red-100">Pelunasan</span>}
+                              {p.isBypassTask && <span className="bg-amber-50 text-amber-600 text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest border border-amber-100">Bypass</span>}
+                           </div>
+                           <p className="text-[11px] text-slate-400 font-bold">{formatDate(p.timestamp)}</p>
+                           <p className="text-lg font-black text-blue-600 mt-2 tracking-tight">Rp {p.cost.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => { setPreviewPhotos(p.photoUrls); setActivePreviewIdx(0); }}
+                        className="p-4 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-2xl transition-all"
+                      >
+                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            <button onClick={() => setModalMode(null)} className="w-full py-6 bg-slate-900 text-white rounded-[1.8rem] font-black text-[11px] uppercase tracking-[0.3em] transition-all shadow-xl hover:bg-black active:scale-[0.98]">Tutup Detail Kamar</button>
+          </div>
+        )}
+      </Modal>
+
+      {/* MODALS - Lainnya tetap sama */}
       <Modal isOpen={modalMode === 'create-user'} onClose={() => setModalMode(null)} title="Registrasi Pengguna Baru" maxWidth="max-w-2xl">
          <form onSubmit={handleCreateUser} className="space-y-6">
             <div className="space-y-4 text-slate-900">
@@ -772,33 +901,6 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
-               <div className="flex items-center justify-between px-2">
-                  <h5 className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Riwayat Belanja Individu</h5>
-                  <div className="h-px bg-slate-100 flex-1 mx-4"></div>
-               </div>
-               <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-2 space-y-3">
-                  {purchases.filter(p => p.buyerUid === selectedUser.uid).length === 0 ? (
-                    <div className="py-10 text-center text-[10px] font-black text-slate-300 uppercase italic">Belum ada riwayat belanja</div>
-                  ) : (
-                    purchases.filter(p => p.buyerUid === selectedUser.uid).map(p => (
-                      <div key={p.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-3xl hover:border-blue-100 transition-all">
-                         <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-xl bg-slate-100 overflow-hidden border border-slate-50 cursor-pointer" onClick={() => { setPreviewPhotos(p.photoUrls); setActivePreviewIdx(0); }}>
-                               {p.photoUrls?.[0] && <img src={p.photoUrls[0]} className="w-full h-full object-cover" />}
-                            </div>
-                            <div>
-                               <p className="text-[10px] font-black text-slate-900">Rp {p.cost.toLocaleString()}</p>
-                               <p className="text-[8px] font-bold text-slate-400 mt-0.5">{formatDate(p.timestamp)}</p>
-                            </div>
-                         </div>
-                         {p.isDebtPayment && <span className="bg-red-50 text-red-500 text-[7px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest">Pelunasan</span>}
-                      </div>
-                    ))
-                  )}
-               </div>
-            </div>
-
             <button onClick={() => setModalMode(null)} className="w-full py-5 bg-slate-900 text-white rounded-[1.8rem] font-black text-[10px] uppercase tracking-widest transition-all shadow-xl hover:bg-black">Tutup Detail</button>
           </div>
         )}
@@ -822,70 +924,6 @@ const AdminDashboard: React.FC = () => {
             </div>
             <button type="submit" disabled={actionLoading} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all">BUAT KAMAR BARU</button>
          </form>
-      </Modal>
-
-      <Modal isOpen={modalMode === 'room-detail'} onClose={() => setModalMode(null)} title="Informasi Kamar" maxWidth="max-w-2xl">
-        {selectedRoom && (
-          <div className="space-y-8">
-            <div className="flex bg-slate-100 p-1.5 rounded-2xl">
-              {['members', 'history'].map(tab => (
-                <button key={tab} onClick={() => setRoomModalTab(tab as any)} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${roomModalTab === tab ? 'bg-white shadow-md text-slate-900' : 'text-slate-400'}`}>
-                  {tab === 'members' ? 'Penghuni' : 'Riwayat Belanja'}
-                </button>
-              ))}
-            </div>
-
-            {roomModalTab === 'members' ? (
-              <div className="space-y-3">
-                 {users.filter(u => u.roomId === selectedRoom.id).sort((a,b) => a.turnOrder - b.turnOrder).map((m, idx) => (
-                   <div key={m.uid} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="flex items-center gap-4">
-                         <div className="h-12 w-12 bg-white rounded-xl flex items-center justify-center border border-slate-100 overflow-hidden shrink-0">
-                            {m.photoUrl ? (
-                              <img src={m.photoUrl} className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="font-black text-[10px] text-slate-300">{m.displayName.charAt(0)}</span>
-                            )}
-                         </div>
-                         <div>
-                            <p className="text-xs font-black text-slate-900 leading-tight">{m.displayName}</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Antrean #{m.turnOrder} &bull; {m.email}</p>
-                         </div>
-                      </div>
-                      {selectedRoom.currentTurnIndex === idx ? (
-                        <span className="bg-blue-600 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-lg shadow-blue-100 animate-pulse">Sedang Giliran</span>
-                      ) : (
-                        <span className="text-[8px] font-black text-slate-300 uppercase">Menunggu</span>
-                      )}
-                   </div>
-                 ))}
-                 {users.filter(u => u.roomId === selectedRoom.id).length === 0 && <p className="text-center py-10 text-[10px] font-black text-slate-300 uppercase italic">Kamar Kosong</p>}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {purchases.filter(p => p.roomId === selectedRoom.id).map(p => (
-                  <div key={p.id} className="bg-slate-50 p-4 rounded-3xl border border-slate-100 flex flex-col gap-4">
-                    <div className="flex items-center gap-4">
-                      <div 
-                        onClick={() => { if (p.photoUrls?.length > 0) { setPreviewPhotos(p.photoUrls); setActivePreviewIdx(0); } }} 
-                        className="h-16 w-16 rounded-2xl bg-slate-200 overflow-hidden cursor-pointer relative shrink-0"
-                      >
-                        {p.photoUrls?.[0] && <img src={p.photoUrls[0]} className="w-full h-full object-cover" />}
-                        {p.photoUrls && p.photoUrls.length > 1 && <span className="absolute bottom-1 right-1 bg-black/50 text-white text-[8px] font-black px-1.5 rounded-md">+{p.photoUrls.length - 1}</span>}
-                      </div>
-                      <div className="min-w-0">
-                         <p className="font-black text-xs text-slate-900 truncate">{p.buyerName}</p>
-                         <p className="text-[12px] text-slate-400 font-bold">{formatDate(p.timestamp)}</p>
-                         <p className="text-[11px] font-black text-blue-600 mt-1">Rp {p.cost.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {purchases.filter(p => p.roomId === selectedRoom.id).length === 0 && <div className="col-span-full py-10 text-center text-[10px] font-black text-slate-300 uppercase italic">Belum ada transaksi</div>}
-              </div>
-            )}
-          </div>
-        )}
       </Modal>
 
       <Modal isOpen={previewPhotos !== null} onClose={() => { setPreviewPhotos(null); setActivePreviewIdx(0); }} title="Bukti Transaksi" maxWidth="max-w-4xl">
