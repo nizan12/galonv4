@@ -1,0 +1,35 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Function to check if user is admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Rooms collection rules
+    match /rooms/{roomId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (
+        isAdmin() || 
+        // Allow students in the room to update turn index
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentTurnIndex']) && 
+         request.auth.uid in resource.data.memberUids)
+      );
+    }
+
+    // Purchases collection rules
+    match /purchases/{purchaseId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null; // Students upload proof
+      allow update, delete: if isAdmin();
+    }
+  }
+}

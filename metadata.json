@@ -1,0 +1,7 @@
+{
+  "name": "Dorm Gallon Scheduler",
+  "description": "A turn-based gallon water purchase scheduling system for dormitories featuring automated rotation, photo proof uploads, and role-based administration.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
