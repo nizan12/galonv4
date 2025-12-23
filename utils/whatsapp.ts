@@ -1,5 +1,5 @@
 /**
- * AquaSchedule WhatsApp Utility using Fonnte API
+ * GalonAsrama WhatsApp Utility using Fonnte API
  */
 
 const FONNTE_API_KEY = 'oXPLZK2ShdADAz1gP4QL';

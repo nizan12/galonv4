@@ -84,7 +84,7 @@ const Register: React.FC = () => {
             )}
           </div>
           <div className="space-y-1">
-            <h2 className="text-4xl font-black text-slate-900 tracking-tighter">AquaSchedule</h2>
+            <h2 className="text-4xl font-black text-slate-900 tracking-tighter">GalonAsrama</h2>
             <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Pendaftaran Siswa Baru</p>
           </div>
         </div>

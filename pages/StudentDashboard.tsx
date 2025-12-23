@@ -255,7 +255,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
         };
         await addDoc(collection(db, 'delivery_orders'), orderData);
 
-        const waMessage = `💧 *PESANAN GALON BARU!*\n---\n📍 *Kamar:* ${room.name}\n👤 *Pemesan:* ${currentBuyer.displayName}\n💰 *Biaya:* Rp ${purchaseCost.toLocaleString()}\n📝 *Catatan:* ${description || '-'}\n---\nMohon segera diproses melalui web AquaSchedule. Bukti pembayaran sudah diupload di sistem.`;
+        const waMessage = `💧 *PESANAN GALON BARU!*\n---\n📍 *Kamar:* ${room.name}\n👤 *Pemesan:* ${currentBuyer.displayName}\n💰 *Biaya:* Rp ${purchaseCost.toLocaleString()}\n📝 *Catatan:* ${description || '-'}\n---\nMohon segera diproses melalui web GalonAsrama. Bukti pembayaran sudah diupload di sistem.`;
 
         if (isBroadcast) {
           availableTukang.forEach(t => {

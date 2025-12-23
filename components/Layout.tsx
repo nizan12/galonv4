@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ user, children }) => {
               )}
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-sm md:text-lg tracking-tight text-slate-900 leading-tight">AquaSchedule</span>
+              <span className="font-extrabold text-sm md:text-lg tracking-tight text-slate-900 leading-tight">GalonAsrama</span>
               <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Smart Dormitory</span>
             </div>
           </Link>
@@ -82,7 +82,7 @@ const Layout: React.FC<LayoutProps> = ({ user, children }) => {
         <div className="max-w-7xl mx-auto flex flex-col items-center space-y-4">
           <div className="h-px w-16 md:w-24 bg-slate-200"></div>
           <p className="text-[8px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest text-center">
-            &copy; {new Date().getFullYear()} AquaSchedule &bull; Premium Dormitory Solution
+            &copy; {new Date().getFullYear()} GalonAsrama &bull; Premium Dormitory Solution
           </p>
         </div>
       </footer>
