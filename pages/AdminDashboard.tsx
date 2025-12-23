@@ -791,22 +791,6 @@ const AdminDashboard: React.FC = () => {
                   </div>
                </div>
 
-               <div className="bg-blue-50 p-6 rounded-[2rem] border border-blue-100 flex flex-col gap-4">
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Manajemen Keamanan</p>
-                    <p className="text-[8px] font-bold text-blue-400 italic">Karena alasan keamanan, password hanya dapat diperbarui melalui email verifikasi oleh pengguna yang bersangkutan.</p>
-                  </div>
-                  <button 
-                    type="button" 
-                    onClick={handleSendResetEmail} 
-                    disabled={actionLoading}
-                    className="w-full py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z" /></svg>
-                    Kirim Link Reset Password Ke Email
-                  </button>
-               </div>
-
                <div>
                   <label className={labelClass}>Role</label>
                   <select value={userFormData.role} onChange={e => setUserFormData({...userFormData, role: e.target.value as UserRole})} className={inputClass}>
