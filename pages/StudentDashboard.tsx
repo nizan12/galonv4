@@ -5,6 +5,7 @@ import { UserProfile, Room, PurchaseHistory, DeliveryOrder } from '../types';
 import Modal from '../components/Modal';
 import { useToast } from '../context/ToastContext';
 import { sendWA } from '../utils/whatsapp';
+import { useApp } from '../App';
 
 interface StudentDashboardProps {
   user: UserProfile;
@@ -12,6 +13,7 @@ interface StudentDashboardProps {
 
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
   const { showToast } = useToast();
+  const { settings } = useApp();
   const [room, setRoom] = useState<Room | null>(null);
   const [members, setMembers] = useState<UserProfile[]>([]);
   const [history, setHistory] = useState<PurchaseHistory[]>([]);
@@ -39,7 +41,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
   const [activeDelivery, setActiveDelivery] = useState<DeliveryOrder | null>(null);
   const [availableTukang, setAvailableTukang] = useState<UserProfile[]>([]);
 
-  // Ref for swipe detection
   const touchStart = useRef<number | null>(null);
   const touchEnd = useRef<number | null>(null);
 
@@ -255,20 +256,23 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
         };
         await addDoc(collection(db, 'delivery_orders'), orderData);
 
-        const waMessage = `💧 *PESANAN GALON BARU!*\n---\n📍 *Kamar:* ${room.name}\n👤 *Pemesan:* ${currentBuyer.displayName}\n💰 *Biaya:* Rp ${purchaseCost.toLocaleString()}\n📝 *Catatan:* ${description || '-'}\n---\nMohon segera diproses melalui web GalonAsrama. Bukti pembayaran sudah diupload di sistem.`;
+        if (settings?.isWANotificationsEnabled) {
+          const waMessage = `💧 *PESANAN GALON BARU!*\n---\n📍 *Kamar:* ${room.name}\n👤 *Pemesan:* ${currentBuyer.displayName}\n💰 *Biaya:* Rp ${purchaseCost.toLocaleString()}\n📝 *Catatan:* ${description || '-'}\n---\nMohon segera diproses melalui web AquaSchedule. Bukti pembayaran sudah diupload di sistem.`;
 
-        if (isBroadcast) {
-          availableTukang.forEach(t => {
-            if (t.phoneNumber) sendWA(t.phoneNumber, waMessage);
-          });
-        } else {
-          if (selectedTukang.phoneNumber) {
-            sendWA(selectedTukang.phoneNumber, waMessage);
+          if (isBroadcast) {
+            availableTukang.forEach(t => {
+              if (t.phoneNumber) sendWA(t.phoneNumber, waMessage);
+            });
+          } else {
+            if (selectedTukang.phoneNumber) {
+              sendWA(selectedTukang.phoneNumber, waMessage);
+            }
           }
         }
       }
 
       let nextMemberName = "";
+      let nextUserToNotify: UserProfile | undefined;
 
       if (isPayingDebt) {
         await updateDoc(doc(db, 'users', currentBuyer.uid), {
@@ -277,8 +281,10 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
         const currentDebt = currentBuyer.bypassDebt || 0;
         if (currentDebt > 1) {
           nextMemberName = `${currentBuyer.displayName} (Sisa Utang: ${currentDebt - 1})`;
+          nextUserToNotify = currentBuyer;
         } else {
           nextMemberName = members[room.currentTurnIndex].displayName;
+          nextUserToNotify = members[room.currentTurnIndex];
         }
       } else {
         let nextIndex;
@@ -312,6 +318,17 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
         await updateDoc(doc(db, 'rooms', room.id), roomUpdate);
         
         nextMemberName = members[nextIndex].displayName;
+        nextUserToNotify = members[nextIndex];
+      }
+
+      // Kirim WhatsApp ke orang berikutnya (Hanya jika diaktifkan di pengaturan)
+      if (nextUserToNotify && nextUserToNotify.phoneNumber && settings?.isWANotificationsEnabled) {
+        const currentDebtDisplay = (nextUserToNotify.uid === currentBuyer.uid && isPayingDebt && currentBuyer.bypassDebt! > 1) 
+          ? `(Sisa Utang: ${currentBuyer.bypassDebt! - 1} galon)` 
+          : "";
+          
+        const turnMessage = `💧 *GANTI GILIRAN GALON!*\n---\nHalo *${nextUserToNotify.displayName}*, giliran Anda untuk membeli galon di *${room.name}* telah tiba ${currentDebtDisplay}.\n\nMohon segera lakukan pembelian dan upload bukti fotonya di web AquaSchedule.\n\nTerima kasih!`;
+        sendWA(nextUserToNotify.phoneNumber, turnMessage);
       }
 
       showToast(`BERHASIL! SELANJUTNYA: ${nextMemberName}`);
@@ -336,18 +353,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
       const substitute = members[substituteIndex];
       if (!substitute) throw new Error("Pengganti tidak ditemukan");
 
-      // 1. Update Room State
       await updateDoc(doc(db, 'rooms', room.id), {
         currentTurnIndex: substituteIndex,
         lastBypasserUid: user.uid
       });
 
-      // 2. Update Helpee (User yang bypass) - Peminjam
       const helpeeUpdate: any = {
         bypassQuota: increment(-1),
         bypassDebt: increment(1)
       };
-      // Simpan riwayat siapa yang dipinjami (pahlawan) + Tanggal
       helpeeUpdate[`borrowedFrom.${substituteUid}`] = {
         name: substitute.displayName,
         count: (user.borrowedFrom?.[substituteUid]?.count || 0) + 1,
@@ -355,15 +369,19 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
       };
       await updateDoc(doc(db, 'users', user.uid), helpeeUpdate);
 
-      // 3. Update Helper (User yang menggantikan) - Penolong
       const helperUpdate: any = { skipCredits: increment(1) };
-      // Simpan riwayat siapa yang sudah dibantu (peminjam) + Tanggal
       helperUpdate[`helpedBy.${user.uid}`] = {
         name: user.displayName,
         count: (substitute.helpedBy?.[user.uid]?.count || 0) + 1,
         lastDate: serverTimestamp()
       };
       await updateDoc(doc(db, 'users', substituteUid), helperUpdate);
+
+      // Notifikasi ke pahlawan yang dipilih (Hanya jika diaktifkan di pengaturan)
+      if (substitute.phoneNumber && settings?.isWANotificationsEnabled) {
+        const bypassMsg = `⚠️ *BYPASS GILIRAN!*\n---\nHalo *${substitute.displayName}*, giliran belanja galon Anda dimajukan karena *${user.displayName}* melakukan bypass di *${room.name}*.\n\nMohon segera diproses ya. Semangat pahlawan asrama!`;
+        sendWA(substitute.phoneNumber, bypassMsg);
+      }
 
       showToast('Bypass berhasil! Anda mendapat hutang 1 galon.', 'info');
       setIsBypassModalOpen(false);
@@ -836,7 +854,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <div className="relative h-40 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center hover:bg-blue-50/50 transition-all cursor-pointer group">
                     <input type="file" multiple className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={handleFileChange} />
-                    <svg className="w-8 h-8 text-slate-300 group-hover:text-blue-600 mb-2 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
+                    <svg className="w-8 h-8 text-slate-300 group-hover:text-blue-600 mb-2 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0010.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
                     <span className="text-[9px] font-black text-slate-400 group-hover:text-blue-600 uppercase">Ketuk Untuk Memotret</span>
                  </div>
                  <div className="h-40 bg-white border border-slate-100 rounded-[2rem] p-4 overflow-y-auto custom-scrollbar">

@@ -41,6 +41,7 @@ export interface Room {
 export interface AppSettings {
   logoUrl?: string;
   appName?: string;
+  isWANotificationsEnabled?: boolean;
 }
 
 export interface PurchaseHistory {
