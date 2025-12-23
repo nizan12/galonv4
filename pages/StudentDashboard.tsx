@@ -379,7 +379,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
 
       // Notifikasi ke pahlawan yang dipilih (Hanya jika diaktifkan di pengaturan)
       if (substitute.phoneNumber && settings?.isWANotificationsEnabled) {
-        const bypassMsg = `⚠️ *BYPASS GILIRAN!*\n---\nHalo *${substitute.displayName}*, giliran belanja galon Anda dimajukan karena *${user.displayName}* melakukan bypass di *${room.name}*.\n\nMohon segera diproses ya. Semangat pahlawan asrama!`;
+        const bypassMsg = `⚠️ *BYPASS GILIRAN!*\n---\nHalo *${substitute.displayName}*, Si *${user.displayName}* melakukan bypass di *${room.name}*.\n\nMohon segera diproses ya. Semangat pahlawan asrama!`;
         sendWA(substitute.phoneNumber, bypassMsg);
       }
 
