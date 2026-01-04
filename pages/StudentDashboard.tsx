@@ -22,7 +22,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
   const [isCompressing, setIsCompressing] = useState(false);
   
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
-  const [purchaseCost, setPurchaseCost] = useState<number>(5000);
+  const [purchaseCost, setPurchaseCost] = useState<number>(6000);
   const [description, setDescription] = useState<string>(''); 
   
   const [viewingImages, setViewingImages] = useState<string[] | null>(null);
@@ -336,7 +336,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
       setSelectedPhotos([]);
       setSelectedTukang(null);
       setIsDeliveryEnabled(false);
-      setPurchaseCost(5000);
+      setPurchaseCost(6000);
       setDescription(''); 
     } catch (err: any) {
       showToast(err.message, 'error');
