@@ -1,9 +1,10 @@
 export type UserRole = 'admin' | 'student' | 'tukang_galon';
+export type StudentStatus = 'aktif' | 'cuti';
 
 export interface InteractionRecord {
   name: string;
   count: number;
-  lastDate?: any; 
+  lastDate?: any;
 }
 
 export interface UserProfile {
@@ -14,19 +15,20 @@ export interface UserProfile {
   roomId: string | null;
   turnOrder: number;
   photoUrl?: string;
-  phoneNumber?: string; 
-  bypassQuota: number;       
-  maxBypassQuota: number;    
-  skipCredits: number;       
-  bypassDebt: number;        
-  helpedBy?: {               
+  phoneNumber?: string;
+  bypassQuota: number;
+  maxBypassQuota: number;
+  skipCredits: number;
+  bypassDebt: number;
+  helpedBy?: {
     [uid: string]: InteractionRecord
   };
-  borrowedFrom?: {               
+  borrowedFrom?: {
     [uid: string]: InteractionRecord
   };
-  lastQuotaReset?: string;   
-  isOnline?: boolean; 
+  lastQuotaReset?: string;
+  isOnline?: boolean;
+  status?: StudentStatus; // 'aktif' | 'cuti' - default: 'aktif'
 }
 
 export interface Room {
@@ -34,8 +36,8 @@ export interface Room {
   name: string;
   currentTurnIndex: number;
   memberUids: string[];
-  lastBypasserUid?: string | null; 
-  cycleCount?: number;       
+  lastBypasserUid?: string | null;
+  cycleCount?: number;
 }
 
 export interface AppSettings {
@@ -50,14 +52,14 @@ export interface PurchaseHistory {
   buyerName: string;
   roomId: string;
   roomName: string;
-  photoUrls: string[]; 
-  deliveryProofUrls?: string[]; 
+  photoUrls: string[];
+  deliveryProofUrls?: string[];
   timestamp: any;
   cost: number;
-  description?: string; 
-  isBypassTask?: boolean; 
-  isDebtPayment?: boolean; 
-  orderId?: string; 
+  description?: string;
+  isBypassTask?: boolean;
+  isDebtPayment?: boolean;
+  orderId?: string;
 }
 
 export interface DeliveryOrder {
@@ -68,12 +70,12 @@ export interface DeliveryOrder {
   buyerName: string;
   status: 'pending' | 'processing' | 'delivered' | 'cancelled';
   cost: number;
-  description?: string; 
+  description?: string;
   timestamp: any;
   deliveredAt?: any;
-  tukangGalonUid?: string | null; 
+  tukangGalonUid?: string | null;
   tukangGalonName?: string | null;
-  photoUrls?: string[]; 
-  deliveryProofUrls?: string[]; 
+  photoUrls?: string[];
+  deliveryProofUrls?: string[];
   purchaseId?: string;
 }

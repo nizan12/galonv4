@@ -1,46 +1,517 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GalonAsrama - Dorm Gallon System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #f8fafc;
-      }
-      .glass {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-      @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-      }
-      .animate-float { animation: float 3s ease-in-out infinite; }
-      
-      @keyframes slideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-      .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-      @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      .animate-slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GalonAsrama - Dorm Gallon System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+    }
 
-      .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-    </style>
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Floating Animation */
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* Slide Up Animation */
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-slide-up {
+      animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Slide In Right */
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-slide-in-right {
+      animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Pulse Glow */
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 20px 10px rgba(59, 130, 246, 0);
+      }
+    }
+
+    .animate-pulse-glow {
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    /* Bounce In */
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0.3);
+        opacity: 0;
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+
+      70% {
+        transform: scale(0.9);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .animate-bounce-in {
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    /* Wiggle */
+    @keyframes wiggle {
+
+      0%,
+      100% {
+        transform: rotate(0deg);
+      }
+
+      25% {
+        transform: rotate(-5deg);
+      }
+
+      75% {
+        transform: rotate(5deg);
+      }
+    }
+
+    .animate-wiggle {
+      animation: wiggle 0.5s ease-in-out;
+    }
+
+    .hover-wiggle:hover {
+      animation: wiggle 0.5s ease-in-out;
+    }
+
+    /* Shake */
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        transform: translateX(-2px);
+      }
+
+      20%,
+      40%,
+      60%,
+      80% {
+        transform: translateX(2px);
+      }
+    }
+
+    .animate-shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    /* Pop */
+    @keyframes pop {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.15);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .animate-pop {
+      animation: pop 0.3s ease-out;
+    }
+
+    .hover-pop:hover {
+      animation: pop 0.3s ease-out;
+    }
+
+    /* Heartbeat */
+    @keyframes heartbeat {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      14% {
+        transform: scale(1.1);
+      }
+
+      28% {
+        transform: scale(1);
+      }
+
+      42% {
+        transform: scale(1.1);
+      }
+
+      70% {
+        transform: scale(1);
+      }
+    }
+
+    .animate-heartbeat {
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+
+    /* Shimmer loading effect */
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .animate-shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* Fade In Up Stagger */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in-up {
+      animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    .stagger-1 {
+      animation-delay: 0.1s;
+      opacity: 0;
+    }
+
+    .stagger-2 {
+      animation-delay: 0.2s;
+      opacity: 0;
+    }
+
+    .stagger-3 {
+      animation-delay: 0.3s;
+      opacity: 0;
+    }
+
+    .stagger-4 {
+      animation-delay: 0.4s;
+      opacity: 0;
+    }
+
+    .stagger-5 {
+      animation-delay: 0.5s;
+      opacity: 0;
+    }
+
+    /* Rotate In */
+    @keyframes rotateIn {
+      from {
+        transform: rotate(-200deg) scale(0);
+        opacity: 0;
+      }
+
+      to {
+        transform: rotate(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .animate-rotate-in {
+      animation: rotateIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    /* Ripple Effect */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple::after {
+      content: '';
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      transform: scale(0);
+      pointer-events: none;
+    }
+
+    .ripple:active::after {
+      animation: rippleEffect 0.6s ease-out;
+    }
+
+    @keyframes rippleEffect {
+      to {
+        transform: scale(40);
+        opacity: 0;
+      }
+    }
+
+    /* Button Hover Effects */
+    .btn-hover-lift {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-hover-lift:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* Card Hover Effects */
+    .card-hover {
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Input Focus Animation */
+    .input-focus-glow {
+      transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .input-focus-glow:focus {
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 4px 15px rgba(59, 130, 246, 0.1);
+      transform: scale(1.01);
+    }
+
+    /* Number Counter Animation */
+    @keyframes countUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-count {
+      animation: countUp 0.4s ease-out;
+    }
+
+    /* Breathing Animation */
+    @keyframes breathe {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+    }
+
+    .animate-breathe {
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    /* Gradient Shift */
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .animate-gradient {
+      background-size: 200% 200%;
+      animation: gradientShift 5s ease infinite;
+    }
+
+    /* Magnetic Hover */
+    .magnetic-hover {
+      transition: transform 0.2s ease-out;
+    }
+
+    /* Success Checkmark */
+    @keyframes checkmark {
+      0% {
+        stroke-dashoffset: 50;
+      }
+
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .animate-checkmark path {
+      stroke-dasharray: 50;
+      animation: checkmark 0.5s ease-out forwards;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+
+    /* Text Gradient Animation */
+    @keyframes textGradient {
+
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .text-gradient-animate {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: textGradient 4s ease infinite;
+    }
+
+    /* Glow Ring */
+    @keyframes glowRing {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+      }
+    }
+
+    .animate-glow-ring {
+      animation: glowRing 2s ease-in-out infinite;
+    }
+
+    /* Jelly Effect */
+    @keyframes jelly {
+
+      0%,
+      100% {
+        transform: scale(1, 1);
+      }
+
+      25% {
+        transform: scale(0.95, 1.05);
+      }
+
+      50% {
+        transform: scale(1.05, 0.95);
+      }
+
+      75% {
+        transform: scale(0.98, 1.02);
+      }
+    }
+
+    .hover-jelly:hover {
+      animation: jelly 0.5s ease;
+    }
+  </style>
   <script type="importmap">
-{
+    {
   "imports": {
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
@@ -53,10 +524,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
+
+<body>
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

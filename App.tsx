@@ -41,7 +41,7 @@ const App: React.FC = () => {
         try {
           const userDocRef = doc(db, 'users', authUser.uid);
           const userDoc = await getDoc(userDocRef);
-          
+
           if (userDoc.exists()) {
             setUser({ ...userDoc.data(), uid: authUser.uid } as UserProfile);
           } else {
@@ -57,7 +57,8 @@ const App: React.FC = () => {
               maxBypassQuota: 3,
               skipCredits: 0,
               bypassDebt: 0,
-              lastQuotaReset: `${new Date().getFullYear()}-${new Date().getMonth() + 1}`
+              lastQuotaReset: `${new Date().getFullYear()}-${new Date().getMonth() + 1}`,
+              status: 'aktif'
             };
             await setDoc(userDocRef, newUser);
             setUser(newUser);
@@ -81,7 +82,7 @@ const App: React.FC = () => {
     if (user && user.role === 'student') {
       const now = new Date();
       const currentMonthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
-      
+
       if (user.lastQuotaReset !== currentMonthKey) {
         const resetQuota = async () => {
           const userRef = doc(db, 'users', user.uid);
@@ -110,7 +111,7 @@ const App: React.FC = () => {
 
   const renderDashboard = () => {
     if (!user) return null;
-    switch(user.role) {
+    switch (user.role) {
       case 'admin': return <AdminDashboard />;
       case 'tukang_galon': return <TukangGalonDashboard user={user} />;
       default: return <StudentDashboard user={user} />;
@@ -124,21 +125,21 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 user ? (
                   <Layout user={user}>
                     {renderDashboard()}
                   </Layout>
                 ) : <Navigate to="/login" replace />
-              } 
+              }
             />
-            <Route 
-              path="/profile" 
+            <Route
+              path="/profile"
               element={
                 user ? <Layout user={user}><Profile user={user} onUpdate={(updated) => setUser(updated)} /></Layout> : <Navigate to="/login" replace />
-              } 
+              }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

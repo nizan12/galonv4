@@ -13,7 +13,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
@@ -63,41 +63,41 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] py-12 px-6 relative overflow-hidden">
-      <div className="absolute top-0 -left-20 w-80 h-80 bg-blue-100 rounded-full blur-[120px] opacity-60"></div>
-      <div className="absolute bottom-0 -right-20 w-80 h-80 bg-indigo-100 rounded-full blur-[120px] opacity-60"></div>
+    <div className="min-h-screen flex items-center justify-center py-12 px-6 relative overflow-hidden bg-slate-50">
+      {/* White Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50" />
 
-      <div className="max-w-md w-full space-y-10 glass p-10 sm:p-12 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-white animate-slide-up relative z-10">
+      <div className="max-w-md w-full space-y-10 bg-white/70 backdrop-blur-xl p-10 sm:p-12 rounded-[3.5rem] shadow-2xl shadow-slate-200/60 border border-white/80 animate-slide-up relative z-10">
         <div className="text-center space-y-4">
-          <div className={`inline-flex items-center justify-center mx-auto h-24 w-24 overflow-hidden transition-all ${!settings?.logoUrl ? 'p-5 bg-slate-900 rounded-[2rem] shadow-2xl shadow-slate-300' : ''}`}>
+          <div className={`inline-flex items-center justify-center mx-auto h-24 w-24 overflow-hidden transition-all animate-breathe ${!settings?.logoUrl ? 'p-5 bg-slate-900 rounded-[2rem] shadow-2xl shadow-slate-300' : ''}`}>
             {settings?.logoUrl ? (
               <img src={settings.logoUrl} className="w-full h-full object-contain" alt="Logo" />
             ) : (
               <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             )}
           </div>
           <div className="space-y-1">
             <h2 className="text-4xl font-black text-slate-900 tracking-tighter">GalonAsrama</h2>
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Portal Login Asrama</p>
+            <p className="text-blue-600/60 font-bold uppercase tracking-widest text-[10px]">Portal Login Asrama</p>
           </div>
         </div>
 
         <form className="space-y-6" onSubmit={handleLogin}>
           {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-100 text-center animate-shake">
+            <div className="bg-red-100 text-red-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-200 text-center animate-shake">
               {error}
             </div>
           )}
-          
+
           <div className="space-y-5">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Email Address</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Email Address</label>
               <input
                 type="email"
                 required
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-900"
+                className="w-full px-6 py-4 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow"
                 placeholder="nama@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -105,11 +105,11 @@ const Login: React.FC = () => {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Secure Password</label>
-                <button 
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Secure Password</label>
+                <button
                   type="button"
                   onClick={() => setIsResetModalOpen(true)}
-                  className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors"
+                  className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-500 transition-colors"
                 >
                   Lupa Password?
                 </button>
@@ -117,7 +117,7 @@ const Login: React.FC = () => {
               <input
                 type="password"
                 required
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-900"
+                className="w-full px-6 py-4 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -128,7 +128,7 @@ const Login: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black text-lg transition-all shadow-xl disabled:opacity-50 active:scale-95 flex items-center justify-center space-x-3"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-5 rounded-2xl font-black text-lg transition-all shadow-xl shadow-blue-500/25 disabled:opacity-50 active:scale-95 flex items-center justify-center space-x-3 btn-hover-lift ripple hover-jelly"
           >
             {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : <span>SIGN IN SEKARANG</span>}
           </button>
@@ -137,7 +137,7 @@ const Login: React.FC = () => {
         <div className="text-center pt-2">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             Belum punya akun?{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 transition-colors font-black">
+            <Link to="/register" className="text-blue-400 hover:text-blue-300 transition-colors font-black">
               Daftar Disini
             </Link>
           </p>
@@ -154,8 +154,8 @@ const Login: React.FC = () => {
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alamat Email</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               required
               className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-900"
               placeholder="nama@email.com"
@@ -164,14 +164,14 @@ const Login: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-3">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={resetLoading}
               className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-black transition-all flex items-center justify-center"
             >
               {resetLoading ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : 'KIRIM LINK RESET'}
             </button>
-            <button 
+            <button
               type="button"
               onClick={() => setIsResetModalOpen(false)}
               className="w-full py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-all"
