@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, arrayUnion, arrayRemove, query, orderBy, where, writeBatch, increment } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, arrayUnion, arrayRemove, query, orderBy, where, writeBatch, increment, deleteField } from 'firebase/firestore';
 import { initializeApp, deleteApp } from '@firebase/app';
 import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from '@firebase/auth';
 import { UserProfile, Room, PurchaseHistory, UserRole, AppSettings, InteractionRecord } from '../types';
@@ -217,8 +217,9 @@ const AdminDashboard: React.FC = () => {
       const newRoomId = userFormData.roomId === "" ? null : userFormData.roomId;
       const oldStatus = selectedUser.status || 'aktif';
       const newStatus = userFormData.status;
+      const isRoomChanged = oldRoomId !== newRoomId;
 
-      await updateDoc(doc(db, 'users', selectedUser.uid), {
+      const updateData: any = {
         displayName: userFormData.displayName,
         phoneNumber: userFormData.phoneNumber,
         bypassQuota: Number(userFormData.bypassQuota),
@@ -229,8 +230,20 @@ const AdminDashboard: React.FC = () => {
         role: userFormData.role,
         roomId: newRoomId,
         status: newStatus
-      });
-      if (oldRoomId !== newRoomId) {
+      };
+
+      // Reset stats jika pindah kamar
+      if (isRoomChanged && newRoomId) {
+        updateData.skipCredits = 0;
+        updateData.bypassDebt = 0;
+        updateData.bypassQuota = Number(userFormData.maxBypassQuota);
+        updateData.helpedBy = deleteField();
+        updateData.borrowedFrom = deleteField();
+      }
+
+      await updateDoc(doc(db, 'users', selectedUser.uid), updateData);
+
+      if (isRoomChanged) {
         if (oldRoomId) await updateDoc(doc(db, 'rooms', oldRoomId), { memberUids: arrayRemove(selectedUser.uid) });
         if (newRoomId) await updateDoc(doc(db, 'rooms', newRoomId), { memberUids: arrayUnion(selectedUser.uid) });
       }
@@ -241,7 +254,7 @@ const AdminDashboard: React.FC = () => {
       }
 
       setModalMode(null);
-      showToast('Profil diperbarui');
+      showToast(isRoomChanged && newRoomId ? 'Profil diperbarui - Stats di-reset untuk kamar baru' : 'Profil diperbarui');
     } catch (err: any) { showToast(err.message, 'error'); } finally { setActionLoading(false); }
   };
 
@@ -296,9 +309,18 @@ const AdminDashboard: React.FC = () => {
     setActionLoading(true);
     try {
       if (action === 'add') {
+        const targetUser = users.find(u => u.uid === userUid);
         await updateDoc(doc(db, 'rooms', selectedRoom.id), { memberUids: arrayUnion(userUid) });
-        await updateDoc(doc(db, 'users', userUid), { roomId: selectedRoom.id });
-        showToast('Penghuni ditambahkan');
+        // Reset stats saat masuk kamar baru
+        await updateDoc(doc(db, 'users', userUid), {
+          roomId: selectedRoom.id,
+          skipCredits: 0,
+          bypassDebt: 0,
+          bypassQuota: targetUser?.maxBypassQuota || 3,
+          helpedBy: deleteField(),
+          borrowedFrom: deleteField()
+        });
+        showToast('Penghuni ditambahkan - Stats di-reset');
       } else {
         await updateDoc(doc(db, 'rooms', selectedRoom.id), { memberUids: arrayRemove(userUid), currentTurnIndex: 0 });
         await updateDoc(doc(db, 'users', userUid), { roomId: null });

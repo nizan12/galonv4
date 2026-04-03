@@ -483,6 +483,33 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
     </div>
   );
 
+  if (!user.roomId) return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 animate-slide-up">
+      <div className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-2xl shadow-blue-900/5 border border-slate-100 text-center space-y-8">
+        <div className="mx-auto w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-[2rem] flex items-center justify-center shadow-xl shadow-blue-200 animate-breathe">
+          <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">Menunggu Penempatan</h2>
+          <p className="text-sm text-slate-500 leading-relaxed font-medium">
+            Akun Anda telah berhasil terdaftar! Admin akan segera menempatkan Anda ke kamar masing-masing. Mohon ditunggu ya 🙏
+          </p>
+        </div>
+        <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100 space-y-2">
+          <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Info Akun</p>
+          <p className="text-sm font-bold text-slate-700">{user.displayName}</p>
+          <p className="text-xs text-slate-400">{user.email}</p>
+        </div>
+        <div className="flex items-center justify-center gap-3 text-slate-400">
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+          <p className="text-[10px] font-black uppercase tracking-widest">Menunggu assign dari Admin...</p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6 md:space-y-10 max-w-6xl mx-auto pb-20 px-4 animate-slide-up">
       {/* Header Room Info */}
