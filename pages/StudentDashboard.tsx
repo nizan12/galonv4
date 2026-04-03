@@ -408,7 +408,46 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
     try {
       const newStatus: StudentStatus = (currentUserData?.status === 'cuti') ? 'aktif' : 'cuti';
       await updateDoc(doc(db, 'users', user.uid), { status: newStatus });
-      showToast(newStatus === 'cuti' ? 'Status diubah ke CUTI - Giliran Anda akan dilompati' : 'Status diubah ke AKTIF - Anda kembali ke antrean normal', 'info');
+
+      // Jika user yang sedang giliran mengubah ke cuti, pindahkan giliran ke user berikutnya yang aktif
+      if (newStatus === 'cuti' && room && members.length > 0) {
+        const currentIdx = room.currentTurnIndex;
+        const currentTurnUser = members[currentIdx];
+        
+        if (currentTurnUser?.uid === user.uid) {
+          // Cari user berikutnya yang tidak cuti
+          let nextIndex = (currentIdx + 1) % members.length;
+          let loopCount = 0;
+          
+          while (loopCount < members.length) {
+            const nextUser = members[nextIndex];
+            // Skip user yang cuti atau punya skipCredits (tapi user yang baru saja set cuti juga perlu di-skip)
+            const isNextUserCuti = nextUser.uid === user.uid ? true : (nextUser.status === 'cuti');
+            
+            if (!isNextUserCuti && nextUser.skipCredits <= 0) {
+              break;
+            }
+            
+            // Decrement skipCredits jika ada (bukan karena cuti)
+            if (!isNextUserCuti && nextUser.skipCredits > 0) {
+              await updateDoc(doc(db, 'users', nextUser.uid), {
+                skipCredits: increment(-1)
+              });
+            }
+            
+            nextIndex = (nextIndex + 1) % members.length;
+            loopCount++;
+          }
+          
+          if (loopCount < members.length) {
+            await updateDoc(doc(db, 'rooms', room.id), {
+              currentTurnIndex: nextIndex
+            });
+          }
+        }
+      }
+
+      showToast(newStatus === 'cuti' ? 'Status diubah ke CUTI - Giliran berpindah ke anggota berikutnya' : 'Status diubah ke AKTIF - Anda kembali ke antrean normal', 'info');
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {

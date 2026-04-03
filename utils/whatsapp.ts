@@ -2,7 +2,7 @@
  * GalonAsrama WhatsApp Utility using Fonnte API
  */
 
-const FONNTE_API_KEY = 'oXPLZK2ShdADAz1gP4QL';
+const FONNTE_API_KEY = 'tUi9xzDBiwqgnCFsRhZN';
 
 export const sendWA = async (target: string, message: string) => {
   if (!target || target === '-' || target.trim() === '') return;
@@ -14,7 +14,7 @@ export const sendWA = async (target: string, message: string) => {
   // Jika mulai dengan 08..., ganti 0 menjadi 62
   if (cleaned.startsWith('0')) {
     cleaned = '62' + cleaned.slice(1);
-  } 
+  }
   // Jika sudah mulai dengan 62..., biarkan
   // Jika tidak mulai dengan 62 dan bukan 0, tambahkan 62 di depan
   else if (!cleaned.startsWith('62')) {
@@ -34,7 +34,7 @@ export const sendWA = async (target: string, message: string) => {
         countryCode: '62'
       })
     });
-    
+
     const result = await response.json();
     if (!result.status) {
       console.error('Fonnte API Error:', result.reason);

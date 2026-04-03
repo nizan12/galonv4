@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, arrayUnion, arrayRemove, query, orderBy, where, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, arrayUnion, arrayRemove, query, orderBy, where, writeBatch, increment } from 'firebase/firestore';
 import { initializeApp, deleteApp } from '@firebase/app';
 import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from '@firebase/auth';
 import { UserProfile, Room, PurchaseHistory, UserRole, AppSettings, InteractionRecord } from '../types';
@@ -180,6 +180,34 @@ const AdminDashboard: React.FC = () => {
     } catch (err: any) { showToast(err.message, 'error'); } finally { await deleteApp(tempApp); setActionLoading(false); }
   };
 
+  // Helper: pindahkan giliran ke user berikutnya jika user yang sedang giliran diubah ke cuti
+  const advanceTurnIfNeeded = async (targetUid: string, targetRoomId: string | null) => {
+    if (!targetRoomId) return;
+    const room = rooms.find(r => r.id === targetRoomId);
+    if (!room) return;
+    const roomMembers = users.filter(u => u.roomId === targetRoomId).sort((a, b) => (a.turnOrder || 0) - (b.turnOrder || 0));
+    if (roomMembers.length === 0) return;
+    const currentIdx = room.currentTurnIndex;
+    const currentTurnUser = roomMembers[currentIdx];
+    if (currentTurnUser?.uid !== targetUid) return;
+
+    let nextIndex = (currentIdx + 1) % roomMembers.length;
+    let loopCount = 0;
+    while (loopCount < roomMembers.length) {
+      const nextUser = roomMembers[nextIndex];
+      const isNextUserCuti = nextUser.uid === targetUid ? true : (nextUser.status === 'cuti');
+      if (!isNextUserCuti && nextUser.skipCredits <= 0) break;
+      if (!isNextUserCuti && nextUser.skipCredits > 0) {
+        await updateDoc(doc(db, 'users', nextUser.uid), { skipCredits: increment(-1) });
+      }
+      nextIndex = (nextIndex + 1) % roomMembers.length;
+      loopCount++;
+    }
+    if (loopCount < roomMembers.length) {
+      await updateDoc(doc(db, 'rooms', room.id), { currentTurnIndex: nextIndex });
+    }
+  };
+
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
@@ -187,6 +215,9 @@ const AdminDashboard: React.FC = () => {
     try {
       const oldRoomId = selectedUser.roomId;
       const newRoomId = userFormData.roomId === "" ? null : userFormData.roomId;
+      const oldStatus = selectedUser.status || 'aktif';
+      const newStatus = userFormData.status;
+
       await updateDoc(doc(db, 'users', selectedUser.uid), {
         displayName: userFormData.displayName,
         phoneNumber: userFormData.phoneNumber,
@@ -197,12 +228,18 @@ const AdminDashboard: React.FC = () => {
         turnOrder: Number(userFormData.turnOrder),
         role: userFormData.role,
         roomId: newRoomId,
-        status: userFormData.status
+        status: newStatus
       });
       if (oldRoomId !== newRoomId) {
         if (oldRoomId) await updateDoc(doc(db, 'rooms', oldRoomId), { memberUids: arrayRemove(selectedUser.uid) });
         if (newRoomId) await updateDoc(doc(db, 'rooms', newRoomId), { memberUids: arrayUnion(selectedUser.uid) });
       }
+
+      // Jika status berubah ke cuti, pindahkan giliran
+      if (oldStatus !== 'cuti' && newStatus === 'cuti') {
+        await advanceTurnIfNeeded(selectedUser.uid, newRoomId || oldRoomId);
+      }
+
       setModalMode(null);
       showToast('Profil diperbarui');
     } catch (err: any) { showToast(err.message, 'error'); } finally { setActionLoading(false); }
@@ -359,6 +396,7 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      {activeTab !== 'settings' && (
       <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:max-w-2xl">
           <div className="relative flex-1 w-full">
@@ -370,17 +408,16 @@ const AdminDashboard: React.FC = () => {
             {activeTab === 'users' ? 'Tambah Pengguna' : 'Tambah Kamar'}
           </button>
         </div>
-        {activeTab !== 'settings' && (
-          <div className="flex items-center gap-3 bg-slate-100 p-1.5 rounded-2xl shadow-inner">
-            <button onClick={() => setViewType('cards')} className={`p-3 rounded-xl transition-all duration-300 ${viewType === 'cards' ? 'bg-white text-slate-900 shadow-sm scale-105' : 'text-slate-400 hover:text-slate-600'}`} title="Grid View">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 5h6v6H4V5zM14 5h6v6h-6V5zM4 15h6v6H4v-6zm10 0h6v6h-6v-6z" /></svg>
-            </button>
-            <button onClick={() => setViewType('table')} className={`p-3 rounded-xl transition-all duration-300 ${viewType === 'table' ? 'bg-white text-slate-900 shadow-sm scale-105' : 'text-slate-400 hover:text-slate-600'}`} title="Table View">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-3 bg-slate-100 p-1.5 rounded-2xl shadow-inner">
+          <button onClick={() => setViewType('cards')} className={`p-3 rounded-xl transition-all duration-300 ${viewType === 'cards' ? 'bg-white text-slate-900 shadow-sm scale-105' : 'text-slate-400 hover:text-slate-600'}`} title="Grid View">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 5h6v6H4V5zM14 5h6v6h-6V5zM4 15h6v6H4v-6zm10 0h6v6h-6v-6z" /></svg>
+          </button>
+          <button onClick={() => setViewType('table')} className={`p-3 rounded-xl transition-all duration-300 ${viewType === 'table' ? 'bg-white text-slate-900 shadow-sm scale-105' : 'text-slate-400 hover:text-slate-600'}`} title="Table View">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+        </div>
       </div>
+      )}
 
       {activeTab === 'users' ? (
         <div className="animate-slide-up">
@@ -999,8 +1036,9 @@ const AdminDashboard: React.FC = () => {
                     <button
                       onClick={async () => {
                         await updateDoc(doc(db, 'users', selectedUser.uid), { status: 'cuti' });
+                        await advanceTurnIfNeeded(selectedUser.uid, selectedUser.roomId);
                         setSelectedUser({ ...selectedUser, status: 'cuti' });
-                        showToast('Status diubah ke CUTI');
+                        showToast('Status diubah ke CUTI - Giliran dipindahkan ke anggota berikutnya');
                       }}
                       className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedUser.status === 'cuti' ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-slate-100 text-slate-400 hover:bg-amber-50 hover:text-amber-600'}`}
                     >
