@@ -99,62 +99,27 @@ const Register: React.FC = () => {
           <div className="space-y-5">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Nama Lengkap</label>
-              <input
-                type="text"
-                required
-                className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow"
-                placeholder="Contoh: John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              <input type="text" required className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow" placeholder="Contoh: John Doe" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Email Address</label>
-              <input
-                type="email"
-                required
-                className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow"
-                placeholder="nama@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <input type="email" required className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow" placeholder="nama@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Nomor WhatsApp</label>
-              <input
-                type="tel"
-                required
-                className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow"
-                placeholder="Contoh: 08123456789"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
+              <input type="tel" required className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow" placeholder="Contoh: 08123456789" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Password</label>
-                <input
-                  type="password"
-                  required
-                  className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <input type="password" required className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Konfirmasi</label>
-                <input
-                  type="password"
-                  required
-                  className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                <input type="password" required className="w-full px-6 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all font-bold text-slate-900 placeholder-slate-400 input-focus-glow" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
               </div>
             </div>
           </div>

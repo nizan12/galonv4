@@ -258,7 +258,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
         await addDoc(collection(db, 'delivery_orders'), orderData);
 
         if (settings?.isWANotificationsEnabled) {
-          const waMessage = `💧 *PESANAN GALON BARU!*\n---\n📍 *Kamar:* ${room.name}\n👤 *Pemesan:* ${currentBuyer.displayName}\n💰 *Biaya:* Rp ${purchaseCost.toLocaleString()}\n📝 *Catatan:* ${description || '-'}\n---\nMohon segera diproses melalui web AquaSchedule. Bukti pembayaran sudah diupload di sistem.`;
+          const waMessage = `💧 *PESANAN GALON BARU!*\n---\n📍 *Kamar:* ${room.name}\n👤 *Pemesan:* ${currentBuyer.displayName}\n💰 *Biaya:* Rp ${purchaseCost.toLocaleString()}\n📝 *Catatan:* ${description || '-'}\n---\nMohon segera diproses melalui web: https://galonasrama.vercel.app \nBukti pembayaran sudah diupload di sistem.`;
 
           if (isBroadcast) {
             availableTukang.forEach(t => {
@@ -331,7 +331,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
           ? `(Sisa Utang: ${currentBuyer.bypassDebt! - 1} galon)`
           : "";
 
-        const turnMessage = `💧 *GANTI GILIRAN GALON!*\n---\nHalo *${nextUserToNotify.displayName}*, giliran Anda untuk membeli galon di *${room.name}* telah tiba ${currentDebtDisplay}.\n\nMohon segera lakukan pembelian dan upload bukti fotonya di web AquaSchedule.\n\nTerima kasih!`;
+        const turnMessage = `💧 *GANTI GILIRAN GALON!*\n---\nHalo *${nextUserToNotify.displayName}*, giliran Anda untuk membeli galon di *${room.name}* telah tiba ${currentDebtDisplay}.\n\nMohon segera lakukan pembelian dan upload bukti fotonya di aplikasi: https://galonasrama.vercel.app \n\nTerima kasih!`;
         sendWA(nextUserToNotify.phoneNumber, turnMessage);
       }
 
@@ -413,32 +413,32 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user }) => {
       if (newStatus === 'cuti' && room && members.length > 0) {
         const currentIdx = room.currentTurnIndex;
         const currentTurnUser = members[currentIdx];
-        
+
         if (currentTurnUser?.uid === user.uid) {
           // Cari user berikutnya yang tidak cuti
           let nextIndex = (currentIdx + 1) % members.length;
           let loopCount = 0;
-          
+
           while (loopCount < members.length) {
             const nextUser = members[nextIndex];
             // Skip user yang cuti atau punya skipCredits (tapi user yang baru saja set cuti juga perlu di-skip)
             const isNextUserCuti = nextUser.uid === user.uid ? true : (nextUser.status === 'cuti');
-            
+
             if (!isNextUserCuti && nextUser.skipCredits <= 0) {
               break;
             }
-            
+
             // Decrement skipCredits jika ada (bukan karena cuti)
             if (!isNextUserCuti && nextUser.skipCredits > 0) {
               await updateDoc(doc(db, 'users', nextUser.uid), {
                 skipCredits: increment(-1)
               });
             }
-            
+
             nextIndex = (nextIndex + 1) % members.length;
             loopCount++;
           }
-          
+
           if (loopCount < members.length) {
             await updateDoc(doc(db, 'rooms', room.id), {
               currentTurnIndex: nextIndex

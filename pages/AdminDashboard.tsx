@@ -232,13 +232,11 @@ const AdminDashboard: React.FC = () => {
         status: newStatus
       };
 
-      // Reset stats jika pindah kamar
+      // Reset stats jika pindah kamar (tapi jangan hapus helpedBy/borrowedFrom agar history kamar lama tetap ada)
       if (isRoomChanged && newRoomId) {
         updateData.skipCredits = 0;
         updateData.bypassDebt = 0;
         updateData.bypassQuota = Number(userFormData.maxBypassQuota);
-        updateData.helpedBy = deleteField();
-        updateData.borrowedFrom = deleteField();
       }
 
       await updateDoc(doc(db, 'users', selectedUser.uid), updateData);
@@ -311,14 +309,12 @@ const AdminDashboard: React.FC = () => {
       if (action === 'add') {
         const targetUser = users.find(u => u.uid === userUid);
         await updateDoc(doc(db, 'rooms', selectedRoom.id), { memberUids: arrayUnion(userUid) });
-        // Reset stats saat masuk kamar baru
+        // Reset stats saat masuk kamar baru (tapi pertahankan helpedBy/borrowedFrom untuk history kamar lama)
         await updateDoc(doc(db, 'users', userUid), {
           roomId: selectedRoom.id,
           skipCredits: 0,
           bypassDebt: 0,
-          bypassQuota: targetUser?.maxBypassQuota || 3,
-          helpedBy: deleteField(),
-          borrowedFrom: deleteField()
+          bypassQuota: targetUser?.maxBypassQuota || 3
         });
         showToast('Penghuni ditambahkan - Stats di-reset');
       } else {
@@ -604,7 +600,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="flex-1 space-y-6"><div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100"><h4 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">Preview Branding</h4><div className="space-y-6"><div className="bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4"><div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center p-2 text-white">{settings?.logoUrl ? <img src={settings.logoUrl} className="w-full h-full object-contain" /> : <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>}</div><p className="font-black text-slate-900 text-sm">Header App</p></div><div className="bg-white p-10 rounded-2xl shadow-sm text-center"><div className="w-20 h-20 bg-slate-900 rounded-[2rem] mx-auto mb-4 flex items-center justify-center p-4 text-white">{settings?.logoUrl ? <img src={settings.logoUrl} className="w-full h-full object-contain" /> : <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>}</div><p className="font-black text-slate-900 text-sm mb-1">AquaSchedule</p><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Halaman Auth</p></div></div></div></div>
+            <div className="flex-1 space-y-6"><div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100"><h4 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">Preview Branding</h4><div className="space-y-6"><div className="bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4"><div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center p-2 text-white">{settings?.logoUrl ? <img src={settings.logoUrl} className="w-full h-full object-contain" /> : <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>}</div><p className="font-black text-slate-900 text-sm">Header App</p></div><div className="bg-white p-10 rounded-2xl shadow-sm text-center"><div className="w-20 h-20 bg-slate-900 rounded-[2rem] mx-auto mb-4 flex items-center justify-center p-4 text-white">{settings?.logoUrl ? <img src={settings.logoUrl} className="w-full h-full object-contain" /> : <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>}</div><p className="font-black text-slate-900 text-sm mb-1">GalonAsrama</p><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Halaman Auth</p></div></div></div></div>
           </div>
 
           {/* Pengaturan Notifikasi WA */}
@@ -673,7 +669,7 @@ const AdminDashboard: React.FC = () => {
             {roomModalTab === 'members' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-up">
                 {users.filter(u => u.roomId === selectedRoom.id).sort((a, b) => a.turnOrder - b.turnOrder).map(m => (
-                  <div key={m.uid} className="flex flex-col p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm"><div className="flex items-center gap-4 mb-4"><div className="h-12 w-12 bg-slate-50 rounded-xl overflow-hidden">{m.photoUrl ? <img src={m.photoUrl} className="w-full h-full object-cover" /> : <span className="font-black text-sm text-slate-300 flex items-center justify-center h-full">{m.displayName.charAt(0)}</span>}</div><div><p className="text-sm font-black text-slate-900 truncate">{m.displayName}</p><p className="text-[9px] font-bold text-slate-400">Order #{m.turnOrder}</p></div></div><div className="grid grid-cols-2 gap-2"><div className="bg-slate-50 p-3 rounded-xl"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total</p><p className="text-xs font-black text-slate-900">{purchases.filter(p => p.buyerUid === m.uid).length} Galon</p></div><div className="bg-slate-50 p-3 rounded-xl"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Quota</p><p className="text-xs font-black text-slate-900">{m.bypassQuota}/{m.maxBypassQuota}</p></div></div></div>
+                  <div key={m.uid} className="flex flex-col p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm"><div className="flex items-center gap-4 mb-4"><div className="h-12 w-12 bg-slate-50 rounded-xl overflow-hidden">{m.photoUrl ? <img src={m.photoUrl} className="w-full h-full object-cover" /> : <span className="font-black text-sm text-slate-300 flex items-center justify-center h-full">{m.displayName.charAt(0)}</span>}</div><div><p className="text-sm font-black text-slate-900 truncate">{m.displayName}</p><p className="text-[9px] font-bold text-slate-400">Order #{m.turnOrder}</p></div></div><div className="grid grid-cols-2 gap-2"><div className="bg-slate-50 p-3 rounded-xl"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total</p><p className="text-xs font-black text-slate-900">{purchases.filter(p => p.buyerUid === m.uid && p.roomId === selectedRoom.id).length} Galon</p></div><div className="bg-slate-50 p-3 rounded-xl"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Quota</p><p className="text-xs font-black text-slate-900">{m.bypassQuota}/{m.maxBypassQuota}</p></div></div></div>
                 ))}
               </div>
             ) : roomModalTab === 'history' ? (
@@ -691,8 +687,22 @@ const AdminDashboard: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4"><h5 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest px-2">Hero (Helpers)</h5><div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">{users.filter(u => u.roomId === selectedRoom.id && u.helpedBy && Object.keys(u.helpedBy).length > 0).map(helper => (<div key={helper.uid} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3"><p className="text-xs font-black text-slate-900">{helper.displayName}</p> {(Object.entries(helper.helpedBy!) as [string, InteractionRecord][]).map(([helpeeUid, record]) => (<div key={helpeeUid} className="flex justify-between text-[10px] font-bold text-slate-400"><span>Membantu {record.name}</span><span className="text-emerald-600 font-black">{record.count}x</span></div>))}</div>))}</div></div>
-                <div className="space-y-4"><h5 className="text-[11px] font-black text-red-600 uppercase tracking-widest px-2">Bypass (Debtors)</h5><div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">{users.filter(u => u.roomId === selectedRoom.id && u.borrowedFrom && Object.keys(u.borrowedFrom).length > 0).map(borrower => (<div key={borrower.uid} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3"><p className="text-xs font-black text-slate-900">{borrower.displayName}</p> {(Object.entries(borrower.borrowedFrom!) as [string, InteractionRecord][]).map(([heroUid, record]) => (<div key={heroUid} className="flex justify-between text-[10px] font-bold text-slate-400"><span>Hutang ke {record.name}</span><span className="text-red-600 font-black">{record.count}x</span></div>))}</div>))}</div></div>
+                <div className="space-y-4"><h5 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest px-2">Hero (Helpers)</h5><div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">{(() => {
+                  const roomMemberUids = new Set(users.filter(u => u.roomId === selectedRoom.id).map(u => u.uid));
+                  return users.filter(u => u.roomId === selectedRoom.id && u.helpedBy && Object.keys(u.helpedBy).length > 0).map(helper => {
+                    const roomEntries = (Object.entries(helper.helpedBy!) as [string, InteractionRecord][]).filter(([helpeeUid]) => roomMemberUids.has(helpeeUid));
+                    if (roomEntries.length === 0) return null;
+                    return (<div key={helper.uid} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3"><p className="text-xs font-black text-slate-900">{helper.displayName}</p> {roomEntries.map(([helpeeUid, record]) => (<div key={helpeeUid} className="flex justify-between text-[10px] font-bold text-slate-400"><span>Membantu {record.name}</span><span className="text-emerald-600 font-black">{record.count}x</span></div>))}</div>);
+                  }).filter(Boolean);
+                })()}</div></div>
+                <div className="space-y-4"><h5 className="text-[11px] font-black text-red-600 uppercase tracking-widest px-2">Bypass (Debtors)</h5><div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">{(() => {
+                  const roomMemberUids = new Set(users.filter(u => u.roomId === selectedRoom.id).map(u => u.uid));
+                  return users.filter(u => u.roomId === selectedRoom.id && u.borrowedFrom && Object.keys(u.borrowedFrom).length > 0).map(borrower => {
+                    const roomEntries = (Object.entries(borrower.borrowedFrom!) as [string, InteractionRecord][]).filter(([heroUid]) => roomMemberUids.has(heroUid));
+                    if (roomEntries.length === 0) return null;
+                    return (<div key={borrower.uid} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3"><p className="text-xs font-black text-slate-900">{borrower.displayName}</p> {roomEntries.map(([heroUid, record]) => (<div key={heroUid} className="flex justify-between text-[10px] font-bold text-slate-400"><span>Hutang ke {record.name}</span><span className="text-red-600 font-black">{record.count}x</span></div>))}</div>);
+                  }).filter(Boolean);
+                })()}</div></div>
               </div>
             )}
             <button onClick={() => setModalMode(null)} className="w-full py-5 bg-slate-900 text-white rounded-[1.8rem] font-black text-[10px] uppercase tracking-widest shadow-xl">TUTUP DETAIL</button>
@@ -1072,7 +1082,7 @@ const AdminDashboard: React.FC = () => {
                 {/* Total Purchases (Read-only) */}
                 <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
                   <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Galon</p>
-                  <span className="text-xl font-black text-slate-900">{purchases.filter(p => p.buyerUid === selectedUser.uid).length}</span>
+                  <span className="text-xl font-black text-slate-900">{purchases.filter(p => p.buyerUid === selectedUser.uid && p.roomId === selectedUser.roomId).length}</span>
                 </div>
               </div>
             </div>
